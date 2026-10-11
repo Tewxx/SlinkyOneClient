@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "slinkybridge",
+  "version": "0.1.0",
+  "name": "SlinkyBridge",
+  "environment": "client",
+  "entrypoints": {
+    "preLaunch": [
+      "tewxx.wtf.bridge.Relauncher"
+    ]
+  },
+  "depends": {
+    "fabricloader": "=0.19.5",
+    "minecraft": "=1.8.9",
+    "java": ">=17"
+  },
+  "custom": {
+    "fabric-loom:remap": false
+  },
+  "authors": [
+    "mega"
+  ]
+}

@@ -1,0 +1,73 @@
+plugins {
+    id 'java'
+}
+
+group = 'tewxx.wtf'
+version = '0.1.0'
+
+repositories {
+    mavenCentral()
+    maven { url = uri('https://maven.fabricmc.net/') }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+            exclude '**/Relauncher.java'
+        }
+        resources.srcDirs = ['src/main/resources']
+    }
+    bootstrap {
+        java {
+            srcDirs = ['src/main/java']
+            include '**/Relauncher.java'
+        }
+        resources.srcDirs = []
+    }
+}
+
+dependencies {
+    compileOnly 'org.ow2.asm:asm:9.10.1'
+    compileOnly 'net.fabricmc:fabric-loader:0.19.5'
+    bootstrapCompileOnly 'net.fabricmc:fabric-loader:0.19.5'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.compilerArgs.add('-Xlint:-options')
+}
+
+tasks.named('compileJava', JavaCompile) {
+    options.release = 8
+}
+
+tasks.named('compileBootstrapJava', JavaCompile) {
+    options.release = 17
+}
+
+def runtimeJar = tasks.register('runtimeJar', Jar) {
+    dependsOn tasks.named('compileJava')
+    archiveFileName = 'runtime.jar'
+    destinationDirectory = layout.buildDirectory.dir('generated/runtime')
+    from(sourceSets.main.output.classesDirs) {
+        include 'tewxx/wtf/bridge/runtime/**'
+    }
+}
+
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+tasks.named('jar', Jar) {
+    archiveBaseName = 'slinkybridge'
+    from sourceSets.bootstrap.output
+    from(runtimeJar) {
+        into 'tewxx/wtf/bridge'
+    }
+    manifest {
+        attributes 'Premain-Class': 'tewxx.wtf.bridge.Agent'
+    }
+}
+
